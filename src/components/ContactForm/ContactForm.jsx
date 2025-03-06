@@ -2,10 +2,11 @@ import css from "./ContactForm.module.css";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useId } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import { addContact } from "../../redux/contactsSlice";
-import { nanoid } from "nanoid";
+import { addContact } from "../../redux/contactsOps";
+import ErrorBlock from "../ErrorBlock/ErrorBlock";
+import { selectError } from "../../redux/contactsSlice";
 
 const innitials = {
   name: "",
@@ -30,48 +31,52 @@ const ContactSchema = Yup.object().shape({
 });
 
 export default function ContactForm() {
+  const error = useSelector(selectError);
   const nameId = useId();
   const telId = useId();
   const dispatch = useDispatch();
 
   function handleSubmit({ name, number }, actions) {
-    dispatch(addContact({ name, number, id: nanoid() }));
+    dispatch(addContact({ name, number }));
     actions.resetForm();
   }
 
   return (
-    <Formik
-      initialValues={innitials}
-      validationSchema={ContactSchema}
-      onSubmit={handleSubmit}
-    >
-      <Form className={css.form}>
-        <label htmlFor={nameId} className={css.caption}>
-          Name
-        </label>
-        <Field
-          type="text"
-          name="name"
-          id={nameId}
-          className={css.field}
-        ></Field>
-        <ErrorMessage className={css.error} name="name" component="span" />
+    <div className={css.container}>
+      <Formik
+        initialValues={innitials}
+        validationSchema={ContactSchema}
+        onSubmit={handleSubmit}
+      >
+        <Form className={css.form}>
+          <label htmlFor={nameId} className={css.caption}>
+            Name
+          </label>
+          <Field
+            type="text"
+            name="name"
+            id={nameId}
+            className={css.field}
+          ></Field>
+          <ErrorMessage className={css.error} name="name" component="span" />
 
-        <label htmlFor={telId} className={css.caption}>
-          Number
-        </label>
-        <Field
-          type="tel"
-          name="number"
-          id={telId}
-          className={css.field}
-        ></Field>
-        <ErrorMessage className={css.error} name="number" component="span" />
+          <label htmlFor={telId} className={css.caption}>
+            Number
+          </label>
+          <Field
+            type="tel"
+            name="number"
+            id={telId}
+            className={css.field}
+          ></Field>
+          <ErrorMessage className={css.error} name="number" component="span" />
 
-        <button type="submit" className={css.addBtn}>
-          Add contact
-        </button>
-      </Form>
-    </Formik>
+          <button type="submit" className={css.addBtn}>
+            Add contact
+          </button>
+        </Form>
+      </Formik>
+      {error && <ErrorBlock message={error} />}
+    </div>
   );
 }
